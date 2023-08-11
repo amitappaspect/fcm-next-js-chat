@@ -1,6 +1,11 @@
+"use client"; // This is a client component 👈🏽
+
+import { onAuthStateChanged } from 'firebase/auth'
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { auth } from '@/components/fcm_config'
+import { useRouter } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,6 +19,24 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+
+  const router = useRouter();
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/auth.user
+      const uid = user.uid;
+      localStorage.setItem('loggedInUserEmail', ''+user.email);
+		  localStorage.setItem('loggedInUserUid', ''+user.uid);
+      // ...
+    } else {
+      localStorage.removeItem('loggedInUserEmail');
+		  localStorage.removeItem('loggedInUserUid');
+      router.push('/');
+
+    }
+  });
   return (
     <html lang="en">
       <body className={inter.className}>{children}</body>
