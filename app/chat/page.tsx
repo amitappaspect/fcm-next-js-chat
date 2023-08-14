@@ -5,8 +5,10 @@ import { BiArrowBack, BiSolidPlusCircle, BiSend } from 'react-icons/bi';
 import { collection, getDocs, doc, DocumentData, onSnapshot } from "firebase/firestore"; 
 import { db } from '@/components/fcm_config';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Chat(){
+    const router = useRouter();
     const userEmail = localStorage.getItem('loggedInUserEmail');
     const [usersData, setUserData] = useState([]);
     
@@ -23,7 +25,9 @@ export default function Chat(){
             
             let tempArr = [];
             doc.docs.forEach(element => {
-                tempArr.push(element.data());
+                if(userEmail != element.data().email){
+                    tempArr.push(element.data());
+                }
             });
             setUserData(tempArr);
         });
@@ -34,7 +38,9 @@ export default function Chat(){
             let tempArr = [];
             querySnapshot.forEach((doc) => {
                 console.log(`${doc.id} => `, doc.data());
-                tempArr.push(doc.data());
+                if(userEmail != doc.data().email){
+                    tempArr.push(doc.data());
+                }
             });
             setUserData(tempArr);
 
@@ -57,14 +63,15 @@ export default function Chat(){
                 {/* User List */}
 
                 {usersData.length>0 && usersData.map((val, index) => {
-                    return <UserListItem key={index} name={val.name} />
+                    return <UserListItem key={index} name={val.name} obj={val}/>
                 })}
             </div>
 
             {/* Chat window */}
             <div className="w-9/12 rounded-t-lg h-400 float-left flex-1">
                 {/* Header */}
-                <div className="min-h-25 w-full bg-teal-800 py-3 px-3 rounded-tr-lg text-white row">
+                <div className="min-h-35 w-full bg-teal-800 py-3 px-3 rounded-tr-lg text-white row">
+                    <div className='mt-2 bg-red-500 px-3 rounded-md float-right' onClick={()=>router.push('/logout')}>Logout</div>
                     <div className='flex gap-2'>
                         <span className='float-left mt-2'><BiArrowBack size="1.5em" /></span>
                         <img className='w-10 h-10 rounded-full float-left' src="https://cdn.pixabay.com/photo/2018/08/28/12/41/avatar-3637425_640.png" />

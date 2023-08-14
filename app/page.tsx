@@ -1,8 +1,9 @@
 "use client"; // This is a client component 👈🏽
 
-import { auth } from '@/components/fcm_config';
+import { auth, db } from '@/components/fcm_config';
 import Loading from '@/components/loading';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, updateDoc } from 'firebase/firestore';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation';
 import { useState } from 'react'
@@ -26,12 +27,19 @@ export default function Home() {
     setLoading(true);
    
     signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
 		console.log('userCredential', userCredential);
         // Signed in 
 		localStorage.setItem('loggedInUserEmail', ''+userCredential.user.email);
 		localStorage.setItem('loggedInUserUid', ''+userCredential.user.uid);
         // ...
+
+        // Update online status.
+        const updateOnlineStatus = doc(db, "users", ""+userCredential.user.email);
+        await updateDoc(updateOnlineStatus, {
+          "online": '1',
+        });
+
 		setError('');
 		setLoading(false);
 
