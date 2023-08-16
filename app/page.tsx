@@ -3,7 +3,7 @@
 import { auth, db } from '@/components/fcm_config';
 import Loading from '@/components/loading';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation';
 import { useState } from 'react'
@@ -30,8 +30,12 @@ export default function Home() {
       .then(async (userCredential) => {
 		console.log('userCredential', userCredential);
         // Signed in 
-		localStorage.setItem('loggedInUserEmail', ''+userCredential.user.email);
-		localStorage.setItem('loggedInUserUid', ''+userCredential.user.uid);
+		    localStorage.setItem('loggedInUserEmail', ''+userCredential.user.email);
+		    localStorage.setItem('loggedInUserUid', ''+userCredential.user.uid);
+		    
+        
+        let userData = await getSingleUser(userCredential.user.email);
+        localStorage.setItem('loggedInUser', JSON.stringify(userData));
         // ...
 
         // Update online status.
@@ -51,6 +55,17 @@ export default function Home() {
 		setError(error.message);
 		setLoading(false);
       });
+  }
+
+  const getSingleUser = async (email) => {
+    try {
+      const docRef = doc(db, "users", email);
+      const docSnap = await getDoc(docRef);
+      console.log('docSnap.data()', docSnap.data());
+      return docSnap.data();
+    } catch (error) {
+      console.error('Issue in get single user : ', error);
+    }
   }
 
   return (

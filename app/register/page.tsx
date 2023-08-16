@@ -46,11 +46,18 @@ export default function Page(){
             });
     }
 
+    const getRandomNumber = () => {
+        let x = Math.floor((Math.random() * 1000) + 1);
+        return x;
+    }
+
     const addUserToUsersTable = async () => {
+        let userId = getRandomNumber();
         await setDoc(doc(db, "users", email), {
             name: name,
             email: email,
-            online: "0"
+            online: "0",
+            user_id: userId
           });
     }
 
